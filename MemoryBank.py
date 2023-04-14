@@ -14,27 +14,37 @@ class MemoryBank(object):
         self.features = torch.FloatTensor(self.n, self.dim) 
         # tensor to store targets
         self.targets = torch.LongTensor(self.n)
-        self.ptr = 0  # pointer to indicate where to store next set of samples
-        self.device = 'cpu'  # device on which to store tensors
+        # pointer to indicate where to store next set of samples
+        self.ptr = 0  
+        # device on which to store tensors
+        self.device = 'cpu'  
         self.K = 100  # number of nearest neighbors to consider for knn
         self.temperature = temperature  # temperature parameter for weighted knn
         self.C = num_classes  # number of classes
 
     def weighted_knn(self, predictions):
         # perform weighted k-nearest neighbor (knn) classification using stored features
-        retrieval_one_hot = torch.zeros(self.K, self.C).to(self.device)  # one-hot tensor to hold retrieved targets
-        batchSize = predictions.shape[0]  # batch size of the predictions
-        correlation = torch.matmul(predictions, self.features.t())  # calculate correlation between predictions and stored features
-        yd, yi = correlation.topk(self.K, dim=1, largest=True, sorted=True)  # get indices and values of K nearest neighbors
-        candidates = self.targets.view(1,-1).expand(batchSize, -1)  # tensor of target indices for every sample
-        retrieval = torch.gather(candidates, 1, yi)  # retrieve target indices for K nearest neighbors
-        retrieval_one_hot.resize_(batchSize * self.K, self.C).zero_()  # resize one-hot tensor
+        # one-hot tensor to hold retrieved targets
+        retrieval_one_hot = torch.zeros(self.K, self.C).to(self.device) 
+        # batch size of the predictions
+        batchSize = predictions.shape[0]  
+        # calculate the correlation between predictions and stored features
+        correlation = torch.matmul(predictions, self.features.t()) 
+        # get indices and values of K nearest neighbors
+        yd, yi = correlation.topk(self.K, dim=1, largest=True, sorted=True) 
+        # tensor of target indices for every sample
+        candidates = self.targets.view(1,-1).expand(batchSize, -1)
+        # retrieve target indices for K nearest neighbors
+        retrieval = torch.gather(candidates, 1, yi)
+        # resize one-hot tensors 
+        retrieval_one_hot.resize_(batchSize * self.K, self.C).zero_() 
         retrieval_one_hot.scatter_(1, retrieval.view(-1, 1), 1)  # set values of one-hot tensor to retrieved target indices
         yd_transform = yd.clone().div_(self.temperature).exp_()  # transform values of distance using temperature parameter
         probs = torch.sum(torch.mul(retrieval_one_hot.view(batchSize, -1 , self.C), 
                           yd_transform.view(batchSize, -1, 1)), 1)  # compute probability of each class using weighted knn
         _, class_preds = probs.sort(1, True)  # get sorted indices of predicted classes
-        class_pred = class_preds[:, 0]  # retrieve predicted classes
+        # retrieve predicted classes
+        class_pred = class_preds[:, 0] 
 
         return class_pred
 
