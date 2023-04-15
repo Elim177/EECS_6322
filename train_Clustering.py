@@ -55,7 +55,7 @@ model_checkpoint = torch.load('scan_model', map_location='cpu')
 model.module.load_state_dict(model_checkpoint['model'])
 # get the prediction values
 predictions = get_predictions(validation_loader, model)
-clustering_values = hungarian_evaluate(model_checkpoint['head'], predictions, 
+clustering_values = hungarian_evaluate(0, predictions, 
                             class_names=validation_dataset.dataset.classes, 
                             compute_confusion_matrix=True, 
                             confusion_matrix_file=os.path.join(['scan_dir'], 'confusion_matrix_scan.png'))
