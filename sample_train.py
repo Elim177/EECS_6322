@@ -13,11 +13,8 @@ from utils.helper import (
     save_config,
     save_vocab,
 )
-
-
 def train(config):
     os.makedirs(config["model_dir"])
-    
     train_dataloader, vocab = get_dataloader_and_vocab(
         model_name=config["model_name"],
         ds_name=config["dataset"],
@@ -27,7 +24,6 @@ def train(config):
         shuffle=config["shuffle"],
         vocab=None,
     )
-
     val_dataloader, _ = get_dataloader_and_vocab(
         model_name=config["model_name"],
         ds_name=config["dataset"],
@@ -37,20 +33,17 @@ def train(config):
         shuffle=config["shuffle"],
         vocab=vocab,
     )
-
     vocab_size = len(vocab.get_stoi())
     print(f"Vocabulary size: {vocab_size}")
-
     model_class = get_model_class(config["model_name"])
     model = model_class(vocab_size=vocab_size)
     criterion = nn.CrossEntropyLoss()
-
+    # optimizer
     optimizer_class = get_optimizer_class(config["optimizer"])
     optimizer = optimizer_class(model.parameters(), lr=config["learning_rate"])
     lr_scheduler = get_lr_scheduler(optimizer, config["epochs"], verbose=True)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    # trainer
     trainer = Trainer(
         model=model,
         epochs=config["epochs"],
@@ -66,7 +59,7 @@ def train(config):
         model_dir=config["model_dir"],
         model_name=config["model_name"],
     )
-
+    # traij
     trainer.train()
     print("Training finished.")
 
@@ -75,8 +68,6 @@ def train(config):
     save_vocab(vocab, config["model_dir"])
     save_config(config, config["model_dir"])
     print("Model artifacts saved to folder:", config["model_dir"])
-    
-    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=True, help='path to yaml config')
