@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# for the confusion matrix
 def confusion_matrix(predictions, ground_truth, class_names, output_file=None):
-
     # calculate the conf_matrix
     n_classes = len(class_names)
     cm = np.zeros((n_classes, n_classes))

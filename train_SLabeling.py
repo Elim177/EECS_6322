@@ -7,7 +7,7 @@ import ClusteringLoss
 import Resnet_Model
 import numpy as np
 from Clustering import calculate_total_loss, get_predictions
-from SelfLabelLoss import self_label_train
+from SelfLabelLoss import selflabel_train
 import os
 from Hungarian_Evaluater import hungarian_evaluate
 
@@ -40,7 +40,7 @@ for epoch in range(epoch):
         print('Epoch %d/%d' %(epoch+1, epoch))
         # Train
         print('***********Train********')
-        self_label_train(train_loader, model, criterion, optimizer, epoch, False)
+        selflabel_train(train_loader, model, criterion, optimizer, epoch, False)
         # Evaluate 
         print('********Make prediction on validation set********')
         predictions = get_predictions(validation_loader, model)
@@ -59,5 +59,5 @@ predictions = get_predictions(validation_loader, model)
 clustering_values = hungarian_evaluate(model_checkpoint['head'], predictions, 
                             class_names=validation_dataset.dataset.classes, 
                             compute_confusion_matrix=True, 
-                            confusion_matrix_file=os.path.join(['scan_dir'], 'confusion_matrix_scan.png'))
+                            confusion_matrix_file=os.path.join(['scan_dir'], 'confusion_matrix_self_label.png'))
 print(clustering_values)     

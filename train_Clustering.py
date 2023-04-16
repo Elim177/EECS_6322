@@ -29,7 +29,7 @@ validation_loader = DataLoader(validation_dataset, batch_size=128, shuffle=True,
 train_dataset_transformed = transform(train_loader)
 validation_dataset_transformed = transform(validation_loader)
 #set up the model and optimizer
-model = Resnet_Model.ResNet().to(device)
+model = torch.load('final_pretext_model.pth').to(device)
 #use the adam optimizer for the model
 optimizer = optim.Adam(model.parameters(), lr=4e-4)
 #setup the loss function
